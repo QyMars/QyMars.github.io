@@ -299,84 +299,16 @@
       
         
           
-            <h2 id="第一种方法：根据程序与系统的API调用作为评估对象"><a href="#第一种方法：根据程序与系统的API调用作为评估对象" class="headerlink" title="第一种方法：根据程序与系统的API调用作为评估对象"></a>第一种方法：根据程序与系统的API调用作为评估对象</h2><p>　　通过对目前大多数类型的Android重打包的恶意程序的分析研究,尤其对其API函数调用情况重点分析,从与系统AH打交道的角度出发,发现重打包的恶意应用程序主要有如下四大类非法获取用户数据资源行为:获取隐私信息类、消耗话费资费类、获取地理位置类和消耗网络流量类。</p>
-<ul>
-<li>1 隐私信息行为:重打包恶意应用程序非法获取用户的手机设备号、电话号码、姓名、通讯录等等私密信息,他们获取了这些私密信息要么非法销售给商业推销者获取暴利,更有甚者利用这些信息进而查询用户6^银行卡等信息,用以进行盗取财产等非法活动,总之对用户来讲隐私信息的泄漏将给他们造成困扰甚至巨大损失。</li>
-</ul>
-<ul>
-<li>2 话费资费行为:重打包恶意应用程序使用户订购各类移动增值收费业务、泄漏隐私信息和传播恶意应用程序都可能通过短信等方式,有些甚至在后台拨打电话,这些都消耗手机了费用。Android系统中,SMSManager提供了手机发送短信的服务。sendTextMessageO和sendMultipartTextMessageO方法可以从本机发送短信到目的号码。SmsMessage.createFromPduO和 getOriginatingAddress()转发短信到一个指定号码。</li>
-</ul>
-<ul>
-<li>3 获取地理位置类:获取地理位置类重打包恶意应用程序是指程序非法获取用户的地理位置信息,从而向用户推送广告进行牟利的方式。在Android系统中,获得用户或者用户设备的位置信息可以通过GPS定位器,也可以通过网络定位。位置服务主要依靠LocationManager系统服务来实现,它提供了许多方法来处理与位置相关的信息。LocationManager 中 getLastKnownLocation(Stringprovider)方法返回一个用户或者设备对象最后位置信息。另外,应用程序需要实现LocationListener接口,然后通过调用 requestLocationUpdates(…,LocationListener listener)方法让LocationManager注册此监听器,完成对各种状态的监听。一般来讲,应用程序一通过覆盖 LocationListener 中的 onLocaticmChanged(Locationlocation)方法以获取新的位置。</li>
-</ul>
-<ul>
-<li>4 网络流量行为:重打包恶意应用程序和外界通信,比如下载恶意应用、泄漏隐私等,都必须通过网络,如此则将造成网络流量的耗费。在Android系统中,应用程序可以通过几个不同的API访问互联网,比如Socket API和HTTP客户端。应用程序可以调用构造函数Socket(String dstName,int dstPort)建立网络连接,然后就可以进行网络通信。另外,Android系统中,使用HTTP联网上传数据也是一种常见的方式,应用程序一般使用POST方法上传数据到某个URL。</li>
-</ul>
-<p>　　知道这些信息后我们可以找到与之对应的API，因为最终这些活动的实施都是依靠着底层的API调用，下表是这些活动分别是依赖于哪个API。</p>
-<table>
-<thead>
-<tr>
-<th>分类</th>
-<th style="text-align:right">后果</th>
-<th style="text-align:center">相关API</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>资费</td>
-<td style="text-align:right">发送短信，发送彩信等恶意消耗手机费用</td>
-<td style="text-align:center">sendMultipartTextMessage(),sendTextMessage(),createFromPduO, getOriginatingAddressO,onCallStateChangedO</td>
-</tr>
-<tr>
-<td>隐私</td>
-<td style="text-align:right">获取手机通讯录、通话记录、IMEI等隐私信息,造成信息泄露</td>
-<td style="text-align:center">contentResolver.query(ContactsContract.Contacts.CONTENT URI),android.provider.Telephony. SMS RECEIVED,getDeviceld（）, getSubscriberld（）, getNetworkOperatorQ,getSimCountrylso（）, getCallState（）, getSimOperator（）,getSimSerialNumber (), getLinelNumber（）</td>
-</tr>
-<tr>
-<td>定位</td>
-<td style="text-align:right">获取当前地理位置,造成位置信息泄露</td>
-<td style="text-align:center">getLastKnownLocation（）, onLocationChanged(),requestLocationUpdates()</td>
-</tr>
-<tr>
-<td>网络</td>
-<td style="text-align:right">恶意上网,消耗手机流量</td>
-<td style="text-align:center">POST。,SocketO, getOutputStream（）</td>
-</tr>
-</tbody>
-</table>
-<p><img src="/images/1.png" alt="架构"></p>
-<p>接下来介绍一下这种检测机制的主要步骤：</p>
-<ul>
-<li><p>1 建立应用程序正常行为数据库：数据库中存储了应用程序j未被重打包前的API调用频率数据;</p>
-</li>
-<li><p>2 数据预处理:将数据库中的数据处理成行为模式的格式。</p>
-</li>
-<li><p>3 收集待检测应用的信息：对于待检测的应用程序,监测并获取API调用频率,并进行数据处理;</p>
-</li>
-<li><p>4 恶意检测:分析待检测的调用数据对应的行为是否恶意,从而判断应用程序是否被重打包; ‘</p>
-</li>
-<li><p>5 检测结果:根据恶意检测分析得出的分析结果,给用户反馈应用程序A是否被重打包。</p>
-</li>
-</ul>
-<p>　　在收集应用信息的时候，通常是运行应用程序,按时间先后顺序获取应用程序对2.1.2总结的API的调用记录。然后处理这些数据,得到不同API在应用程序运行时间内的调用次数，从而得到应程序的行为数据。</p>
-<p>　　在进行恶意检测的时候通常是将我们收集到的数据转换成矩阵的形式，然后在与正版应用的数据做相似度匹配，通过设立一个阈值来判断该应用是否是重打包的。</p>
-<p>这里只是提供一个重打包软件检测的思路，并不详细讲解如何实现，具体实现方法请参考下面这篇论文<br><a href="http://xueshu.baidu.com/s?wd=paperuri%3A%28cac384ff5941c7464191b6c20d066268%29&amp;filter=sc_long_sign&amp;tn=SE_xueshusource_2kduw22v&amp;sc_vurl=http%3A%2F%2Fd.wanfangdata.com.cn%2FThesis_Y2849173.aspx&amp;ie=utf-8&amp;sc_us=2280412144906889465" target="_blank" rel="external">基于行为分析的Android应用程序安全评估技术研究与系统设计</a></p>
-<h2 id="第二种方法：云端协作的重打包检测"><a href="#第二种方法：云端协作的重打包检测" class="headerlink" title="第二种方法：云端协作的重打包检测"></a>第二种方法：云端协作的重打包检测</h2><p>　　这种方案相对于其他方法它解决了一个主要问题，就是在手机端检测的性能问题，由于手机的性能有限在进行稍微复杂一点的检测运算时可能会花费很长时间，甚至会出现手机卡顿等现象。这种方法很好的对这种情况提供了解决方法，它提出了一种云端协作的方案，将复杂的运算放在云端进行，在终端利用云端的模式库来进行安全检测，在对正常应用和重打包恶意应用的区分上面，采用了系统调用短序列的方案。</p>
-<p>　　这里先解释一下系统调用短序列，首先先来看一下系统调用序列，系统调用序列是用户在对APK进行操作的时候在某段时间内APK调用系统函数的序列，例如当前有一个APK在一段时间内的系统调用序列为 Γ = { c1 ，c2 ，…，cn}，其中 ci( 1 ≤ i ≤ n ) 表示一个 Linux 系统调用，短序列长度为 k。生成系统调用短序列主要有两个步骤：</p>
-<ul>
-<li><p>1 分别以 ci( 1 ≤ i ≤ n － k + 1) 开始，截取 k 个系统调用，构成短序列集合</p>
-</li>
-<li><p>2 对 1) 中生成的短序列集合进行去除重复的操作</p>
-</li>
-</ul>
-<p>　　例如有以下系统调用序列：(1) clock_gettime (2) ioctl (3) clock_gettime (4) ioctl　(5) clock_gettime (6) getpid (7) getuid32，选定短序列的长度为 k = 3 ，则生成的生成的系统调用短序列为：clock_gettime ioctl clock_gettime， ioctl  clock_gettime  ioctl， ioctl clock_gettime  getpid， clock_gettime  getpid  getuid32，其中有一个序列clock_gettime ioctl clock_gettime因为重复所以删除了。</p>
-<p>下面来看一下它的具体的架构：</p>
-<p>安全架构分为云端和终端两部分，在云端的主要步骤是:<br>　　( 1 ) 从 Google 官方应用市场，或应用官方网站下载正常的应用，分发给众多测试用户在不同设备使用，系统调用序列收集器进行记录并上传用户使用过程产生的系统调用记录;<br>　　( 2 ) 对收集到的正常应用的海量使用序列进行基于短序列行为的分析，生成这个应用的正常行为模式库。</p>
-<p>在终端的主要步骤是:<br>　　( 1 ) 终端运行安全服务， 以 Android 服务的形式存在; 服务在第一次启动时获取系统已安装的应用， 并从云端更新“正常行为模式库” ; 当有新应用安装或旧应用卸载时， 安全服务也会下载或删除其对应的正常行为模式库。<br>　　( 2 ) 系统调用序列收集器， 首先通过 ActivityManager 类的getRunningAppProcesses 方法获取 Android 系统正在运行的进程信息，包括进程号 PID、 进程名 NAME 和应用包名 pkg 等; 然后对未标记为安全的应用的进程进行序列采样; Linux 系统的程序ptrace 可以跟踪进程的系统调用， 比如要跟踪进程 PID 是 1000<br>的进程的系统调用， 可以使用 ptrace-p 1000， 在 Android 系统执行可以使用 Runtime． getRuntime( ) ． exec ( “strace-p 1000” ) 。<br>　　( 3 ) 行为分析器，对收集到的应用一段时间内的系统调用序列，进行短序列提取 ， 然后基于正常行为模式库计算异常率 。<br>　　( 4 ) 根据行为分析器得到的异常率， 由管理进程仲裁是否超过阈值，如果被认定为恶意重打包应用，则通过恶意应用提示器对用户进行有效的提示; 经多次检测均为正常的应用被管理进程标记为安全。</p>
-<p>这里只是提供以下思路，具体这种方法的实现请参考：<br><a href="http://xueshu.baidu.com/s?wd=%E5%9F%BA%E4%BA%8EAndroid%E6%9D%83%E9%99%90%E6%9C%BA%E5%88%B6%E7%9A%84%E5%BA%94%E7%94%A8%E5%AE%89%E5%85%A8%E6%A3%80%E6%B5%8B%E6%96%B9%E6%B3%95&amp;rsv_bp=0&amp;tn=SE_baiduxueshu_c1gjeupa&amp;rsv_spt=3&amp;ie=utf-8&amp;f=8&amp;rsv_sug2=1&amp;sc_f_para=sc_tasktype%3D%7BfirstSimpleSearch%7D&amp;rsv_n=2" target="_blank" rel="external">基于Android权限机制的应用安全检测方法</a></p>
-<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><p>以上是关于android重打包检测的两种方法，这两种方法只是简单介绍了它们的基本思想，只是给大家提供一些解决的思路，具体详细的实施方案对应论文里有详细介绍，希望对你有所帮助，也希望你可以一直支持我们MarsSecure.</p>
+          第一种方法：根据程序与系统的API调用作为评估对象　　通过对目前大多数类型的Android重打包的恶意程序的分析研究,尤其对其API函数调用情况重点分析,从与系统AH打交道的角度出发,发现重打包的恶意应用程序主要有如下四大类非法获取用户数据资源行为:获取隐私信息类、消耗话费资费类、获取地理位置类和消耗网络流量类。
 
-          
+1 隐私信息行为:重打包恶意应用程序非法获取用户的手机设备号、电话号码、姓名、通讯
+          ...
+
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/09/18/Android-APP重打包研究-二-两种检测方法学习/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -475,25 +407,14 @@
       
         
           
-            <h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>　　简单来说应用重打包就是恶意的开发者将原先应用程序进行破译， 对非核心的代码资料进行恶意的改动， 并对应用进行重新的打包，发布到市场中， 我们将应用重新打包后产生的应用称为重打包应用。如果将重打包应用进行分类， 可以根据其重打包的目的以及其它因素将其分为替换广告库版、 汉化版、 功能扩充版。<br>　　重打包软件不仅对正版厂商造成了利益的损害而且也对用户造成一些潜在的威胁。<br>　　重打包有一下几种威胁：</p>
-<ul>
-<li><p>1 恶意扣费:该类重打包软件会不经过用户许可,在后台执行SP业务,自动发送短信息、拨打电话或者接入网络等,而整个过程是不会展现给用户的,也就是说该应用程序在执行这些操作的时候并没有申请一个Activity,全部在暗箱操作,不知不觉中用户的话费就会减少。</p>
-</li>
-<li><p>2 窃取隐私:该类软件主要获取用户的个人信息,在后台读取手机的联系人信息、短信息、GPS位置等,然后发送给指定的服务器端,而整个过程用户也是察觉不到的。</p>
-</li>
-<li><p>3 系统破坏:该类软件会干扰用户使用手机,例如频繁发送垃圾短信,使系统不能正常运行,随意修改或者删除手机内容,甚至破坏SIM卡、烧毁硬件等。</p>
-</li>
-</ul>
-<h2 id="现状："><a href="#现状：" class="headerlink" title="现状："></a>现状：</h2><p>　　目前应用中，充斥着大量的重打包应用软件。对于重打包者来说，通过重打包当前流行的和下载量高的app，然后投放到市场中，当用户下载并使用了重打包的app，那么他们就可以获取不正当的利益，这严重损害了正常开发者的利益。<br>重打包者的目的是以最小的代价来实现重打包，他们并不希望大量修改APP或者重做一个类似的APP。第一是成本高，这与他们最初的最小代价的目的背道而驰。第二是不能保证下载量，如果重做的APP并不能达到其原始APP的下载量，那也是无用的。 
-　　  </p>
-<h2 id="方法："><a href="#方法：" class="headerlink" title="方法："></a>方法：</h2><p>　　重打包者一般都会通过修改原始APP的广告受益人ID、改变广告库、植入恶意代码、添加广告来实现重打包。</p>
-<h2 id="检测方法："><a href="#检测方法：" class="headerlink" title="检测方法："></a>检测方法：</h2><p>　　目前检测方法主要有静态检测、动态检测、混合检测。<br>　　静态检测：<br>　　　　数字签名检测方法<br>　　　　DEX特征值检测<br>　　　　程序依赖图检测<br>　　　　资源检测<br>　　　　代码相似度检测<br>　　动态检测：<br>　　　　行为分析检测  </p>
-<h2 id="注意点："><a href="#注意点：" class="headerlink" title="注意点："></a>注意点：</h2><p>　　实现一个重打包检测系统，需要考虑以下几点：<br>　　1、签名检测方法，签名在重打包检测中十分好用，因为重打包者无法仿冒原始APP制作者的签名<br>　　2、加固处理，免费的加固对于开发者已经随处获得，如果重打包者对其重打包的APP进行了加固，很多已有的方法就不能进行检测，这需要好好考虑<br>　　3、广告库，对于一些检测方法，添加了其他的广告库，会影响对于代码的检测，需要考虑<br>　　4、代码混淆，现在代码混淆工具随处可以见，ProGuard&amp;DexGuard，检测系统肯定也需要考虑这一点的影响  
-　　</p>
-<h2 id="未来："><a href="#未来：" class="headerlink" title="未来："></a>未来：</h2><p>　　逐步学习一个重打包检测系统中所需要的所有的知识并搭建出一个可用的重打包检测系统。希望对大家有所帮助，也希望你可以一直支持我们MarsSecure。
-　　　　</p>
+          简介：　　简单来说应用重打包就是恶意的开发者将原先应用程序进行破译， 对非核心的代码资料进行恶意的改动， 并对应用进行重新的打包，发布到市场中， 我们将应用重新打包后产生的应用称为重打包应用。如果将重打包应用进行分类， 可以根据其重打包的目的以及其它因素将其分为替换广告库版、 汉化版、 功能扩充版。　　重打包软件不仅对正版厂商造成了利益的损害而且也对用户造成一些潜在的威胁。　　重打包有一下几种威胁
+          ...
 
-          
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/09/18/Android-APP重打包研究-一-开篇/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -592,10 +513,16 @@
       
         
           
-            <h2 id="博客新篇章"><a href="#博客新篇章" class="headerlink" title="博客新篇章"></a>博客新篇章</h2><p>我们MarsSecure团队关注移动安全和大数据分析领域。<br>以后，我们团队会不定期的更新博客，分享技术知识。</p>
-<h2 id="团队成员"><a href="#团队成员" class="headerlink" title="团队成员"></a>团队成员</h2><p>　　　　Mars<br>　　　　Jupiter<br>　　　　Pluto</p>
+          博客新篇章我们MarsSecure团队关注移动安全和大数据分析领域。以后，我们团队会不定期的更新博客，分享技术知识。
+团队成员　　　　Mars　　　　Jupiter　　　　Pluto
 
           
+
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/09/03/hello-world/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
