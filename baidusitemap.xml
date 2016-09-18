@@ -4,13 +4,15 @@
 
     
   <url>
-    <loc>http://blog.marssecure.com/2016/09/18/Android-APP%E9%87%8D%E6%89%93%E5%8C%85%E7%A0%94%E7%A9%B6-%E4%BA%8C-%E4%B8%A4%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0/</loc>
-    <lastmod>2016-09-18T08:08:06.933Z</lastmod>
+    <loc>http://blog.marssecure.com/2016/09/18/Android-APP%E9%87%8D%E6%89%93%E5%8C%85%E7%A0%94%E7%A9%B6-%E4%B8%80-%E5%BC%80%E7%AF%87/</loc>
+    <lastmod>2016-09-18T12:44:05.036Z</lastmod>
     <data>
         <display>
-        <title>Android APP重打包研究(二) 两种检测方法学习</title>
-        <pubTime>2016-09-18T07:45:57.000Z</pubTime>
+        <title>Android APP重打包研究(一) 开篇</title>
+        <pubTime>2016-09-18T07:24:36.000Z</pubTime>
         
+        <tag>Android</tag>
+         
          
            
         </display>
@@ -19,13 +21,15 @@
 
     
   <url>
-    <loc>http://blog.marssecure.com/2016/09/18/Android-APP%E9%87%8D%E6%89%93%E5%8C%85%E7%A0%94%E7%A9%B6-%E4%B8%80-%E5%BC%80%E7%AF%87/</loc>
-    <lastmod>2016-09-18T07:30:40.336Z</lastmod>
+    <loc>http://blog.marssecure.com/2016/09/18/Android-APP%E9%87%8D%E6%89%93%E5%8C%85%E7%A0%94%E7%A9%B6-%E4%BA%8C-%E4%B8%A4%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E6%B3%95%E5%AD%A6%E4%B9%A0/</loc>
+    <lastmod>2016-09-18T12:43:53.802Z</lastmod>
     <data>
         <display>
-        <title>Android APP重打包研究(一) 开篇</title>
-        <pubTime>2016-09-18T07:24:36.000Z</pubTime>
+        <title>Android APP重打包研究(二) 两种检测方法学习</title>
+        <pubTime>2016-09-18T07:45:57.000Z</pubTime>
         
+        <tag>Android</tag>
+         
          
            
         </display>
