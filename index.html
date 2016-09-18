@@ -248,6 +248,123 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/18/Android-APP重打包研究-一-开篇/" itemprop="url">
+                  Android APP重打包研究(一) 开篇
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-18T15:24:36+08:00" content="2016-09-18">
+              2016-09-18
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/09/18/Android-APP重打包研究-一-开篇/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/09/18/Android-APP重打包研究-一-开篇/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>　　简单来说应用重打包就是恶意的开发者将原先应用程序进行破译， 对非核心的代码资料进行恶意的改动， 并对应用进行重新的打包，发布到市场中， 我们将应用重新打包后产生的应用称为重打包应用。如果将重打包应用进行分类， 可以根据其重打包的目的以及其它因素将其分为替换广告库版、 汉化版、 功能扩充版。<br>　　重打包软件不仅对正版厂商造成了利益的损害而且也对用户造成一些潜在的威胁。<br>　　重打包有一下几种威胁：</p>
+<ul>
+<li><p>1 恶意扣费:该类重打包软件会不经过用户许可,在后台执行SP业务,自动发送短信息、拨打电话或者接入网络等,而整个过程是不会展现给用户的,也就是说该应用程序在执行这些操作的时候并没有申请一个Activity,全部在暗箱操作,不知不觉中用户的话费就会减少。</p>
+</li>
+<li><p>2 窃取隐私:该类软件主要获取用户的个人信息,在后台读取手机的联系人信息、短信息、GPS位置等,然后发送给指定的服务器端,而整个过程用户也是察觉不到的。</p>
+</li>
+<li><p>3 系统破坏:该类软件会干扰用户使用手机,例如频繁发送垃圾短信,使系统不能正常运行,随意修改或者删除手机内容,甚至破坏SIM卡、烧毁硬件等。</p>
+</li>
+</ul>
+<h2 id="现状："><a href="#现状：" class="headerlink" title="现状："></a>现状：</h2><p>　　目前应用中，充斥着大量的重打包应用软件。对于重打包者来说，通过重打包当前流行的和下载量高的app，然后投放到市场中，当用户下载并使用了重打包的app，那么他们就可以获取不正当的利益，这严重损害了正常开发者的利益。<br>重打包者的目的是以最小的代价来实现重打包，他们并不希望大量修改APP或者重做一个类似的APP。第一是成本高，这与他们最初的最小代价的目的背道而驰。第二是不能保证下载量，如果重做的APP并不能达到其原始APP的下载量，那也是无用的。 
+　　  </p>
+<h2 id="方法："><a href="#方法：" class="headerlink" title="方法："></a>方法：</h2><p>　　重打包者一般都会通过修改原始APP的广告受益人ID、改变广告库、植入恶意代码、添加广告来实现重打包。</p>
+<h2 id="检测方法："><a href="#检测方法：" class="headerlink" title="检测方法："></a>检测方法：</h2><p>　　目前检测方法主要有静态检测、动态检测、混合检测。<br>　　静态检测：<br>　　　　数字签名检测方法<br>　　　　DEX特征值检测<br>　　　　程序依赖图检测<br>　　　　资源检测<br>　　　　代码相似度检测<br>　　动态检测：<br>　　　　行为分析检测  </p>
+<h2 id="注意点："><a href="#注意点：" class="headerlink" title="注意点："></a>注意点：</h2><p>　　实现一个重打包检测系统，需要考虑以下几点：<br>　　1、签名检测方法，签名在重打包检测中十分好用，因为重打包者无法仿冒原始APP制作者的签名<br>　　2、加固处理，免费的加固对于开发者已经随处获得，如果重打包者对其重打包的APP进行了加固，很多已有的方法就不能进行检测，这需要好好考虑<br>　　3、广告库，对于一些检测方法，添加了其他的广告库，会影响对于代码的检测，需要考虑<br>　　4、代码混淆，现在代码混淆工具随处可以见，ProGuard&amp;DexGuard，检测系统肯定也需要考虑这一点的影响  
+　　</p>
+<h2 id="未来："><a href="#未来：" class="headerlink" title="未来："></a>未来：</h2><p>　　逐步学习一个重打包检测系统中所需要的所有的知识并搭建出一个可用的重打包检测系统。希望对大家有所帮助，也希望你可以一直支持我们MarsSecure。
+　　　　</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/09/03/hello-world/" itemprop="url">
                   MarsSecure新篇章
                 </a>
@@ -370,7 +487,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-count">2</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
