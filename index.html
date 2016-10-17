@@ -248,6 +248,113 @@
             
               
                 
+                <a class="post-title-link" href="/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/" itemprop="url">
+                  Android源码解析（1） PackageManagerService解析platfrom.xml
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-10-17T22:25:02+08:00" content="2016-10-17">
+              2016-10-17
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          platform.xmlAndroid中沿用Linux用户和组的来限制系统资源的访问,查看从Android真机pull出/etc/permissions/platform.xml
+权限初始化PackageManagerService构造函数会解析platform.xml，建立android权限和gid的对应关系。然后，扫描apk时，会由请求的权限找到对应的gid，并保存在Package类中。由于A
+          ...
+
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/09/29/Android-APP重打包研究-三-APK签名研究/" itemprop="url">
                   Android APP重打包研究(三) APK签名研究
                 </a>
@@ -804,13 +911,20 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-count">6</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
 
           
 
+          
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
           
 
         </nav>

@@ -1,0 +1,658 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="google-site-verification" content="YNMp-6sFoEr8PhRRLNVT-bV3KMLz0zXEoEj_0px8VPk" />
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android Source Code," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="platform.xmlAndroid中沿用Linux用户和组的来限制系统资源的访问,查看从Android真机pull出/etc/permissions/platform.xml
+权限初始化PackageManagerService构造函数会解析platform.xml，建立android权限和gid的对应关系。然后，扫描apk时，会由请求的权限找到对应的gid，并保存在Package类中。由于A">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码解析（1） PackageManagerService解析platfrom.xml">
+<meta property="og:url" content="http://blog.marssecure.com/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/index.html">
+<meta property="og:site_name" content="MarsSecure">
+<meta property="og:description" content="platform.xmlAndroid中沿用Linux用户和组的来限制系统资源的访问,查看从Android真机pull出/etc/permissions/platform.xml
+权限初始化PackageManagerService构造函数会解析platform.xml，建立android权限和gid的对应关系。然后，扫描apk时，会由请求的权限找到对应的gid，并保存在Package类中。由于A">
+<meta property="og:image" content="http://blog.marssecure.com/images/20161017-1.png">
+<meta property="og:updated_time" content="2016-10-17T14:26:57.674Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android源码解析（1） PackageManagerService解析platfrom.xml">
+<meta name="twitter:description" content="platform.xmlAndroid中沿用Linux用户和组的来限制系统资源的访问,查看从Android真机pull出/etc/permissions/platform.xml
+权限初始化PackageManagerService构造函数会解析platform.xml，建立android权限和gid的对应关系。然后，扫描apk时，会由请求的权限找到对应的gid，并保存在Package类中。由于A">
+<meta name="twitter:image" content="http://blog.marssecure.com/images/20161017-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 6322010742786622000,
+      author: '����'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://blog.marssecure.com/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/"/>
+
+  <title> Android源码解析（1） PackageManagerService解析platfrom.xml | MarsSecure </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?0276a966b5be56ad948565c22b5d6bf0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">MarsSecure</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">关注移动安全和大数据分析</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android源码解析（1） PackageManagerService解析platfrom.xml
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-10-17T22:25:02+08:00" content="2016-10-17">
+              2016-10-17
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="platform-xml"><a href="#platform-xml" class="headerlink" title="platform.xml"></a>platform.xml</h2><p>Android中沿用Linux用户和组的来限制系统资源的访问,查看从Android真机pull出/etc/permissions/platform.xml<br><img src="/images/20161017-1.png" alt="image"></p>
+<h2 id="权限初始化"><a href="#权限初始化" class="headerlink" title="权限初始化"></a>权限初始化</h2><p>PackageManagerService构造函数会解析platform.xml，建立android权限和gid的对应关系。然后，扫描apk时，会由请求的权限找到对应的gid，并保存在Package类中。<br>由于Android很多都是使用permission来进行保护，需要在AndroidManifest中显示声明对应权限，有些在platfrom.xml中定义的权限须由特定用户组使用<br>下面来解析一下在该构造方法中对于plafrom.xml解析</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><h3 id="初始化处理permission文件"><a href="#初始化处理permission文件" class="headerlink" title="初始化处理permission文件"></a>初始化处理permission文件</h3><ul>
+<li>创建的时候，在构造方法中初始化systemConfig</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public PackageManagerService(Context context, Installer installer, boolean factoryTest, boolean onlyCore) &#123;</div><div class="line">...</div><div class="line">    SystemConfig systemConfig = SystemConfig.getInstance()</div><div class="line">...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><p>getInstance()是创建一个SystemConfig对象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public static SystemConfig getInstance() &#123;</div><div class="line">        synchronized (SystemConfig.class) &#123;</div><div class="line">            if (sInstance == null) &#123;</div><div class="line">                sInstance = new SystemConfig();</div><div class="line">            &#125;</div><div class="line">            return sInstance;</div><div class="line">        &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>SystemConfig构造方法中，使用readPermissions处理了系统和OEM厂商的配置和系统权限  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">SystemConfig() &#123;</div><div class="line"> /system/etc/sysconfig</div><div class="line">        readPermissions(Environment.buildPath(</div><div class="line">                Environment.getRootDirectory(), &quot;etc&quot;, &quot;sysconfig&quot;), false);</div><div class="line"> /system/etc/permissions</div><div class="line">        readPermissions(Environment.buildPath(</div><div class="line">                Environment.getRootDirectory(), &quot;etc&quot;, &quot;permissions&quot;), false);</div><div class="line"> /oem/etc/sysconfig </div><div class="line">        readPermissions(Environment.buildPath(</div><div class="line">                Environment.getOemDirectory(), &quot;etc&quot;, &quot;sysconfig&quot;), true);</div><div class="line"> /oem/etc/permissions</div><div class="line">        readPermissions(Environment.buildPath( </div><div class="line">                Environment.getOemDirectory(), &quot;etc&quot;, &quot;permissions&quot;), true);</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>对于上面四个目录都使用了readPermissions函数读取</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">void readPermissions(File libraryDir, boolean onlyFeatures) &#123;</div><div class="line">        // 从给定的文件夹中读取权限</div><div class="line"> ....</div><div class="line">        // 迭代方式读取xml文件</div><div class="line">        File platformFile = null;</div><div class="line">        for (File f : libraryDir.listFiles()) &#123;</div><div class="line">            // 最后单独处理platform.xml</div><div class="line">            if (f.getPath().endsWith(&quot;etc/permissions/platform.xml&quot;)) &#123;</div><div class="line">                platformFile = f;</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line">            ...</div><div class="line">     // 取到的xml结尾的文件，使用readPermissionsFromXml读取</div><div class="line">            readPermissionsFromXml(f, onlyFeatures);</div><div class="line">        &#125;</div><div class="line">        // 最后读取平台权限以致其能最优先</div><div class="line">        if (platformFile != null) &#123;</div><div class="line">            readPermissionsFromXml(platformFile, onlyFeatures);</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>不管是platform.xml还是其他的xml文件，都是调用readPermissionsFromXml函数处理，assign-permission解析后存放到mSystemPermissions中，uid和permission对应  </li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">ArraySet&lt;String&gt; perms = mSystemPermissions.get(uid);</div><div class="line">if (perms == null) &#123;</div><div class="line">        perms = new ArraySet&lt;String&gt;();</div><div class="line">        mSystemPermissions.put(uid, perms);</div><div class="line"> &#125;</div><div class="line">perms.add(perm);</div><div class="line"></div><div class="line">permission将permission和gid存放到mPermissions中</div><div class="line">PermissionEntry perm = mPermissions.get(name);</div><div class="line">if (perm == null) &#123;</div><div class="line">    perm = new PermissionEntry(name);</div><div class="line">    mPermissions.put(name, perm);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>整体方法源代码</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div></pre></td><td class="code"><pre><div class="line">private void readPermissionsFromXml(File permFile, boolean onlyFeatures) &#123;</div><div class="line">        FileReader permReader = null;</div><div class="line">        permReader = new FileReader(permFile);</div><div class="line"> // 当前系统是否对低内存支持</div><div class="line">        final boolean lowRam = ActivityManager.isLowRamDeviceStatic();</div><div class="line"></div><div class="line">        try &#123;</div><div class="line">            XmlPullParser parser = Xml.newPullParser();</div><div class="line">            parser.setInput(permReader);</div><div class="line"></div><div class="line">            int type;</div><div class="line">            while ((type=parser.next()) != parser.START_TAG</div><div class="line">                       &amp;&amp; type != parser.END_DOCUMENT) &#123;</div><div class="line">                ;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            if (type != parser.START_TAG) &#123;</div><div class="line">                throw new XmlPullParserException(&quot;No start tag found&quot;);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            if (!parser.getName().equals(&quot;permissions&quot;) &amp;&amp; !parser.getName().equals(&quot;config&quot;)) &#123;</div><div class="line">                throw new XmlPullParserException(&quot;Unexpected start tag in &quot; + permFile</div><div class="line">                        + &quot;: found &quot; + parser.getName() + &quot;, expected &apos;permissions&apos; or &apos;config&apos;&quot;);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            while (true) &#123;</div><div class="line">                XmlUtils.nextElement(parser);</div><div class="line">                String name = parser.getName();</div><div class="line">                if (&quot;group&quot;.equals(name) &amp;&amp; !onlyFeatures) &#123;</div><div class="line">                    String gidStr = parser.getAttributeValue(null, &quot;gid&quot;);</div><div class="line">                    if (gidStr != null) &#123;</div><div class="line">                        int gid = android.os.Process.getGidForName(gidStr);</div><div class="line">                        mGlobalGids = appendInt(mGlobalGids, gid);</div><div class="line">                    &#125; else &#123;</div><div class="line">                        Slog.w(TAG, &quot;&lt;group&gt; without gid in &quot; + permFile + &quot; at &quot;</div><div class="line">                                + parser.getPositionDescription());</div><div class="line">                    &#125;</div><div class="line"></div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line">                    continue;</div><div class="line"></div><div class="line">                &#125; else if (&quot;permission&quot;.equals(name) &amp;&amp; !onlyFeatures) &#123;</div><div class="line">                    String perm = parser.getAttributeValue(null, &quot;name&quot;);</div><div class="line">                    perm = perm.intern();</div><div class="line">                    readPermission(parser, perm);</div><div class="line"></div><div class="line">                &#125; else if (&quot;assign-permission&quot;.equals(name) &amp;&amp; !onlyFeatures) &#123;</div><div class="line">                    String perm = parser.getAttributeValue(null, &quot;name&quot;);</div><div class="line">                    String uidStr = parser.getAttributeValue(null, &quot;uid&quot;);</div><div class="line">                    int uid = Process.getUidForName(uidStr);</div><div class="line">                    perm = perm.intern();</div><div class="line">                    ArraySet&lt;String&gt; perms = mSystemPermissions.get(uid);</div><div class="line">                    if (perms == null) &#123;</div><div class="line">                        perms = new ArraySet&lt;String&gt;();</div><div class="line">                        mSystemPermissions.put(uid, perms);</div><div class="line">                    &#125;</div><div class="line">                    perms.add(perm);</div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line"></div><div class="line">                &#125; else if (&quot;library&quot;.equals(name) &amp;&amp; !onlyFeatures) &#123;</div><div class="line">                    String lname = parser.getAttributeValue(null, &quot;name&quot;);</div><div class="line">                    String lfile = parser.getAttributeValue(null, &quot;file&quot;);</div><div class="line">                    if (lname == null) &#123;</div><div class="line">                        Slog.w(TAG, &quot;&lt;library&gt; without name in &quot; + permFile + &quot; at &quot;</div><div class="line">                                + parser.getPositionDescription());</div><div class="line">                    &#125; else if (lfile == null) &#123;</div><div class="line">                        Slog.w(TAG, &quot;&lt;library&gt; without file in &quot; + permFile + &quot; at &quot;</div><div class="line">                                + parser.getPositionDescription());</div><div class="line">                    &#125; else &#123;</div><div class="line">                        //Log.i(TAG, &quot;Got library &quot; + lname + &quot; in &quot; + lfile);</div><div class="line">                        mSharedLibraries.put(lname, lfile);</div><div class="line">                    &#125;</div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line">                    continue;</div><div class="line"></div><div class="line">                &#125; else if (&quot;feature&quot;.equals(name)) &#123;</div><div class="line">                    String fname = parser.getAttributeValue(null, &quot;name&quot;);</div><div class="line">                    boolean allowed;</div><div class="line">                    if (!lowRam) &#123;</div><div class="line">                        allowed = true;</div><div class="line">                    &#125; else &#123;</div><div class="line">                        String notLowRam = parser.getAttributeValue(null, &quot;notLowRam&quot;);</div><div class="line">                        allowed = !&quot;true&quot;.equals(notLowRam);</div><div class="line">                    &#125;</div><div class="line">                    if (fname == null) &#123;</div><div class="line">                        Slog.w(TAG, &quot;&lt;feature&gt; without name in &quot; + permFile + &quot; at &quot;</div><div class="line">                                + parser.getPositionDescription());</div><div class="line">                    &#125; else if (allowed) &#123;</div><div class="line">                        //Log.i(TAG, &quot;Got feature &quot; + fname);</div><div class="line">                        FeatureInfo fi = new FeatureInfo();</div><div class="line">                        fi.name = fname;</div><div class="line">                        mAvailableFeatures.put(fname, fi);</div><div class="line">                    &#125;</div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line">                    continue;</div><div class="line"></div><div class="line">                &#125; else if (&quot;unavailable-feature&quot;.equals(name)) &#123;</div><div class="line">                    String fname = parser.getAttributeValue(null, &quot;name&quot;);</div><div class="line">                    if (fname == null) &#123;</div><div class="line">                        Slog.w(TAG, &quot;&lt;unavailable-feature&gt; without name in &quot; + permFile + &quot; at &quot;</div><div class="line">                                + parser.getPositionDescription());</div><div class="line">                    &#125; else &#123;</div><div class="line">                        mUnavailableFeatures.add(fname);</div><div class="line">                    &#125;</div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line">                    continue;</div><div class="line"></div><div class="line">                &#125; else if (&quot;allow-in-power-save&quot;.equals(name) &amp;&amp; !onlyFeatures) &#123;</div><div class="line">                    String pkgname = parser.getAttributeValue(null, &quot;package&quot;);</div><div class="line">                    if (pkgname == null) &#123;</div><div class="line">                        Slog.w(TAG, &quot;&lt;allow-in-power-save&gt; without package in &quot; + permFile + &quot; at &quot;</div><div class="line">                                + parser.getPositionDescription());</div><div class="line">                    &#125; else &#123;</div><div class="line">                        mAllowInPowerSave.add(pkgname);</div><div class="line">                    &#125;</div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line">                    continue;</div><div class="line"></div><div class="line">                &#125; else if (&quot;fixed-ime-app&quot;.equals(name) &amp;&amp; !onlyFeatures) &#123;</div><div class="line">                    String pkgname = parser.getAttributeValue(null, &quot;package&quot;);</div><div class="line">                    if (pkgname == null) &#123;</div><div class="line">                        Slog.w(TAG, &quot;&lt;fixed-ime-app&gt; without package in &quot; + permFile + &quot; at &quot;</div><div class="line">                                + parser.getPositionDescription());</div><div class="line">                    &#125; else &#123;</div><div class="line">                        mFixedImeApps.add(pkgname);</div><div class="line">                    &#125;</div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line">                    continue;</div><div class="line"></div><div class="line">                &#125; else &#123;</div><div class="line">                    XmlUtils.skipCurrentTag(parser);</div><div class="line">                    continue;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125; catch (XmlPullParserException e) &#123;</div><div class="line">           ...</div><div class="line">        &#125; finally &#123;</div><div class="line">            IoUtils.closeQuietly(permReader);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        for (String fname : mUnavailableFeatures) &#123;</div><div class="line">            if (mAvailableFeatures.remove(fname) != null) &#123;</div><div class="line">                Slog.d(TAG, &quot;Removed unavailable feature &quot; + fname);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>看platfrom.xml文件中内容，permission将属性name中权限赋予group中gid用户组，assign-permission把属性name中权限赋予uid用户  </li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">&lt;permissions&gt;</div><div class="line">    &lt;permission name=&quot;android.permission.BLUETOOTH_ADMIN&quot; &gt;</div><div class="line">        &lt;group gid=&quot;net_bt_admin&quot; /&gt;</div><div class="line">    &lt;/permission&gt;</div><div class="line">    &lt;permission name=&quot;android.permission.BLUETOOTH&quot; &gt;</div><div class="line">        &lt;group gid=&quot;net_bt&quot; /&gt;</div><div class="line">    &lt;/permission&gt;</div><div class="line">    &lt;permission name=&quot;android.permission.INTERNET&quot; &gt;</div><div class="line">        &lt;group gid=&quot;inet&quot; /&gt;</div><div class="line">    &lt;/permission&gt;</div><div class="line">    ...</div><div class="line">    &lt;assign-permission name=&quot;android.permission.MODIFY_AUDIO_SETTINGS&quot; uid=&quot;media&quot; /&gt;</div><div class="line">    &lt;assign-permission name=&quot;android.permission.ACCESS_SURFACE_FLINGER&quot; uid=&quot;media&quot; /&gt;</div><div class="line">    &lt;assign-permission name=&quot;android.permission.WAKE_LOCK&quot; uid=&quot;media&quot; /&gt;</div><div class="line">    &lt;assign-permission name=&quot;android.permission.UPDATE_DEVICE_STATS&quot; uid=&quot;media&quot; /&gt;</div><div class="line">    &lt;assign-permission name=&quot;android.permission.UPDATE_APP_OPS_STATS&quot; uid=&quot;media&quot; /&gt;</div><div class="line">    &lt;assign-permission name=&quot;android.permission.ACCESS_SURFACE_FLINGER&quot; uid=&quot;graphics&quot; /&gt;</div><div class="line">    &lt;library name=&quot;android.test.runner&quot;</div><div class="line">            file=&quot;/system/framework/android.test.runner.jar&quot; /&gt;</div><div class="line">    &lt;library name=&quot;javax.obex&quot;</div><div class="line">            file=&quot;/system/framework/javax.obex.jar&quot;/&gt;</div><div class="line">    &lt;library name=&quot;javax.btobex&quot;</div><div class="line">            file=&quot;/system/framework/javax.btobex.jar&quot;/&gt;</div><div class="line">    &lt;!--网络访问的白名单，即使他们不在前面--&gt;</div><div class="line">    &lt;allow-in-power-save package=&quot;com.android.providers.downloads&quot; /&gt;</div><div class="line">&lt;/permissions&gt;</div></pre></td></tr></table></figure>
+<h2 id="未来："><a href="#未来：" class="headerlink" title="未来："></a>未来：</h2><p>下一步会去研究一下安装apk时候权限解析的源代码，更好理解权限在整个系统中的运用。希望对大家有所帮助，也希望你可以一直支持我们MarsSecure。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android-Source-Code/" rel="tag">#Android Source Code</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/29/Android-APP重打包研究-三-APK签名研究/" rel="next" title="Android APP重打包研究(三) APK签名研究">
+                <i class="fa fa-chevron-left"></i> Android APP重打包研究(三) APK签名研究
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/"
+           data-title="Android源码解析（1） PackageManagerService解析platfrom.xml" data-url="http://blog.marssecure.com/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/MarsSecure.jpg"
+               alt="Mars" />
+          <p class="site-author-name" itemprop="name">Mars</p>
+          <p class="site-description motion-element" itemprop="description">Mars移动安全团队博客主页。</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/QyMars" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3094522023" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#platform-xml"><span class="nav-number">1.</span> <span class="nav-text">platform.xml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#权限初始化"><span class="nav-number">2.</span> <span class="nav-text">权限初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化处理permission文件"><span class="nav-number">3.1.</span> <span class="nav-text">初始化处理permission文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#未来："><span class="nav-number">4.</span> <span class="nav-text">未来：</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mars</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"marssecure"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
