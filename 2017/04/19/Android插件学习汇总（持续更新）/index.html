@@ -1,0 +1,645 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="google-site-verification" content="YNMp-6sFoEr8PhRRLNVT-bV3KMLz0zXEoEj_0px8VPk" />
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Android插件学习Android插件好处 实现热更新操作 业务热拔插 提高启动速度  基本实现使用一个宿主APK，即空壳程序，通过动态加载功能跟实现插件包调用，从而实现动态更新的功能。 开篇对于这一个块的内容学习，我也是刚刚接触，希望从我一步一步学习下去，由浅入深，更好的理解这个动态加载过程，最终目标能够实现一个相对比较完备的插件框架。 基础知识DexClassLoader可以实现对于Dex、">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android插件学习汇总（持续更新）">
+<meta property="og:url" content="http://blog.marssecure.com/2017/04/19/Android插件学习汇总（持续更新）/index.html">
+<meta property="og:site_name" content="MarsSecure">
+<meta property="og:description" content="Android插件学习Android插件好处 实现热更新操作 业务热拔插 提高启动速度  基本实现使用一个宿主APK，即空壳程序，通过动态加载功能跟实现插件包调用，从而实现动态更新的功能。 开篇对于这一个块的内容学习，我也是刚刚接触，希望从我一步一步学习下去，由浅入深，更好的理解这个动态加载过程，最终目标能够实现一个相对比较完备的插件框架。 基础知识DexClassLoader可以实现对于Dex、">
+<meta property="og:image" content="http://blog.marssecure.com/images/Android插件-1.png">
+<meta property="og:updated_time" content="2017-04-19T08:50:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android插件学习汇总（持续更新）">
+<meta name="twitter:description" content="Android插件学习Android插件好处 实现热更新操作 业务热拔插 提高启动速度  基本实现使用一个宿主APK，即空壳程序，通过动态加载功能跟实现插件包调用，从而实现动态更新的功能。 开篇对于这一个块的内容学习，我也是刚刚接触，希望从我一步一步学习下去，由浅入深，更好的理解这个动态加载过程，最终目标能够实现一个相对比较完备的插件框架。 基础知识DexClassLoader可以实现对于Dex、">
+<meta name="twitter:image" content="http://blog.marssecure.com/images/Android插件-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 6322010742786622000,
+      author: '����'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://blog.marssecure.com/2017/04/19/Android插件学习汇总（持续更新）/"/>
+
+  <title> Android插件学习汇总（持续更新） | MarsSecure </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?0276a966b5be56ad948565c22b5d6bf0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">MarsSecure</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">关注移动安全和大数据分析</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android插件学习汇总（持续更新）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-04-19T16:31:25+08:00" content="2017-04-19">
+              2017-04-19
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/04/19/Android插件学习汇总（持续更新）/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/04/19/Android插件学习汇总（持续更新）/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android插件学习"><a href="#Android插件学习" class="headerlink" title="Android插件学习"></a>Android插件学习</h1><h2 id="Android插件好处"><a href="#Android插件好处" class="headerlink" title="Android插件好处"></a>Android插件好处</h2><ol>
+<li>实现热更新操作</li>
+<li>业务热拔插</li>
+<li>提高启动速度</li>
+</ol>
+<h2 id="基本实现"><a href="#基本实现" class="headerlink" title="基本实现"></a>基本实现</h2><p>使用一个宿主APK，即空壳程序，通过动态加载功能跟实现插件包调用，从而实现动态更新的功能。</p>
+<h2 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h2><p>对于这一个块的内容学习，我也是刚刚接触，希望从我一步一步学习下去，由浅入深，更好的理解这个动态加载过程，最终目标能够实现一个相对比较完备的插件框架。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><p>DexClassLoader可以实现对于Dex、jar、Apk加载<br><img src="/images/Android插件-1.png" alt="1"></p>
+<h2 id="入门篇"><a href="#入门篇" class="headerlink" title="入门篇"></a>入门篇</h2><h3 id="1-DL（Dynamic-load-apk）"><a href="#1-DL（Dynamic-load-apk）" class="headerlink" title="1. DL（Dynamic-load-apk）"></a>1. DL（Dynamic-load-apk）</h3><p>该框架使用代理的方式实现插件框架<br>由于作者写过相关的文章，这边引用其文章内容作为基础，我对其进行补充。<br><a href="http://blog.csdn.net/singwhatiwanna/article/details/22597587" target="_blank" rel="external">Android apk动态加载机制的研究</a><br>首先根据上面的文章进行第一次的实践，在实践过程中进行理解和分析。<br>在上述文章中主要讲的是如何实现代理，如何对Activity类进行改造。  </p>
+<h4 id="代理原理："><a href="#代理原理：" class="headerlink" title="代理原理："></a>代理原理：</h4><p>1、首先获取到插件包位置，然后调用PackageManger.getPackageArchiveInfo()函数来获取其中PackageInfo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">protected void launchTargetActivity() &#123;</div><div class="line">PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(</div><div class="line">mDexPath, PackageManager.GET_ACTIVITIES);</div><div class="line">if ((packageInfo.activities != null)</div><div class="line">&amp;&amp; (packageInfo.activities.length &gt; 0)) &#123;</div><div class="line">String activityName = packageInfo.activities[0].name;  // 主要是获取打开的Activity名称</div><div class="line">mClass = activityName;</div><div class="line">Log.d(&quot;TAG&quot;, mClass);</div><div class="line">launchTargetActivity(mClass);  // 作为参数传入</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>2、主要有三部<br>a. 通过反射调用获取到代理类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Class&lt;?&gt; localClass = dexClassLoader.loadClass(className);</div><div class="line">Constructor&lt;?&gt; localConstructor = localClass.getConstructor(new Class[] &#123;&#125;);</div><div class="line">Object instance = localConstructor.newInstance(new Object[] &#123;&#125;);</div></pre></td></tr></table></figure>
+<p>b. 传入当前Activity，代理类保存起来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Method setProxy = localClass.getMethod(&quot;setProxy&quot;,</div><div class="line">new Class[] &#123; Activity.class &#125;);</div><div class="line">setProxy.setAccessible(true);</div><div class="line">setProxy.invoke(instance, new Object[] &#123; this &#125;);  // 传入当前Activity</div></pre></td></tr></table></figure>
+<p>代理类中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public void setProxy(Activity proxyActivity) &#123;</div><div class="line">mProxyActivity = proxyActivity;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>c. 使用宿主APP的Activity对象来进行调用相关功能，即onCreate函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Method onCreate = localClass.getDeclaredMethod(&quot;onCreate&quot;, new Class[] &#123; Bundle.class &#125;);</div><div class="line">onCreate.setAccessible(true);</div><div class="line">Bundle bundle = new Bundle();</div><div class="line">bundle.putInt(FROM, FROM_EXTERNAL);</div><div class="line">onCreate.invoke(instance, new Object[] &#123; bundle &#125;);</div></pre></td></tr></table></figure>
+<p>3、代理类BaseActivity：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public void setContentView(View view) &#123;</div><div class="line">if (mProxyActivity == this) &#123;</div><div class="line">super.setContentView(view);</div><div class="line">&#125; else &#123;</div><div class="line">mProxyActivity.setContentView(view);  // 主要用传入的Activity类实现相关操作</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注意：<br>为了访问相关路径下的插件包，需要相关的权限</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;!-- 在SDCard中创建与删除文件权限 --&gt;</div><div class="line">&lt;uses-permission android:name=&quot;android.permission.MOUNT_UNMOUNT_FILESYSTEMS&quot;/&gt;</div><div class="line">&lt;!-- 往SDCard写入数据权限 --&gt;</div><div class="line">&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;/&gt;</div></pre></td></tr></table></figure>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>对当前学习的一个总结  </p>
+<p>2017-04-19 16:47:10 更新的基础DL分析，下一步学习资源文件访问</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/17/Android源码解析（1）-PackageManagerService解析platfrom-xml/" rel="prev" title="Android源码解析（1） PackageManagerService解析platfrom.xml">
+                Android源码解析（1） PackageManagerService解析platfrom.xml <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/04/19/Android插件学习汇总（持续更新）/"
+           data-title="Android插件学习汇总（持续更新）" data-url="http://blog.marssecure.com/2017/04/19/Android插件学习汇总（持续更新）/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/MarsSecure.jpg"
+               alt="Mars" />
+          <p class="site-author-name" itemprop="name">Mars</p>
+          <p class="site-description motion-element" itemprop="description">Mars移动安全团队博客主页。</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/QyMars" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/3094522023" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android插件学习"><span class="nav-number">1.</span> <span class="nav-text">Android插件学习</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Android插件好处"><span class="nav-number">1.1.</span> <span class="nav-text">Android插件好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本实现"><span class="nav-number">1.2.</span> <span class="nav-text">基本实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开篇"><span class="nav-number">1.3.</span> <span class="nav-text">开篇</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础知识"><span class="nav-number">1.4.</span> <span class="nav-text">基础知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#入门篇"><span class="nav-number">1.5.</span> <span class="nav-text">入门篇</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-DL（Dynamic-load-apk）"><span class="nav-number">1.5.1.</span> <span class="nav-text">1. DL（Dynamic-load-apk）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#代理原理："><span class="nav-number">1.5.1.1.</span> <span class="nav-text">代理原理：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结尾"><span class="nav-number">1.6.</span> <span class="nav-text">结尾</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mars</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"marssecure"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
